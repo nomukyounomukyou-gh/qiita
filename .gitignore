@@ -1,0 +1,13 @@
+# OCI credentials and local configuration
+connection_info/
+**/connection_info/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Local tooling and temporary files
+node_modules/
+*.log
+.DS_Store
