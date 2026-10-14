@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>店舗システム障害 初動支援Agent</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #182536; background: #f2f5f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #1e334b; color: white; padding: 18px max(20px, calc((100vw - 1200px)/2)); }
+    h1 { font-size: 1.28rem; margin: 0; }
+    header p { margin: 4px 0 0; color: #cfdae5; font-size: .9rem; }
+    main { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; max-width: 1240px; margin: 20px auto; padding: 0 20px; min-height: calc(100vh - 120px); }
+    .panel { background: white; border: 1px solid #dce3ea; border-radius: 12px; box-shadow: 0 2px 8px #1825360a; }
+    aside { padding: 18px; align-self: start; }
+    h2 { font-size: 1rem; margin: 0 0 10px; }
+    .subtle { color: #586777; font-size: .82rem; line-height: 1.5; }
+    .samples { display: grid; gap: 7px; margin: 14px 0 20px; }
+    .sample { width: 100%; text-align: left; border: 1px solid #dce3ea; background: #f8fafc; border-radius: 8px; padding: 10px; color: #23354a; cursor: pointer; font: inherit; line-height: 1.35; }
+    .sample:hover, .sample:focus-visible { border-color: #c44b37; background: #fff6f3; }
+    .sample strong { display: block; font-size: .78rem; color: #8b392e; margin-bottom: 2px; }
+    .glossary { border-top: 1px solid #e3e7eb; padding-top: 16px; }
+    .glossary dl { margin: 0; font-size: .83rem; line-height: 1.5; }
+    .glossary dt { font-weight: 700; margin-top: 9px; }
+    .glossary dd { margin: 2px 0 0; color: #4d5c6a; }
+    .chat { display: flex; flex-direction: column; min-height: 660px; max-height: calc(100vh - 135px); overflow: hidden; }
+    .chat-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid #e3e7eb; }
+    .chat-head h2 { margin: 0; }
+    .chat-head small { color: #687686; }
+    .new-chat { border: 1px solid #b9c4ce; color: #34485d; background: white; border-radius: 7px; padding: 7px 11px; font: inherit; font-size: .8rem; cursor: pointer; white-space: nowrap; }
+    .messages { flex: 1; overflow-y: auto; padding: 22px 18px; display: flex; flex-direction: column; gap: 16px; }
+    .empty { margin: auto; text-align: center; max-width: 440px; color: #5c6e80; }
+    .empty strong { display: block; color: #23354a; font-size: 1.12rem; margin-bottom: 5px; }
+    .message { max-width: min(760px, 93%); border-radius: 12px; padding: 13px 16px; line-height: 1.65; }
+    .message.user { align-self: flex-end; background: #e7eff8; border: 1px solid #cfdeec; }
+    .message.agent { align-self: flex-start; background: #fff; border: 1px solid #d9e1e8; box-shadow: 0 1px 4px #1825360b; }
+    .message.error { border-color: #d58171; background: #fff7f4; }
+    .speaker { display: block; font-weight: 700; font-size: .78rem; margin-bottom: 5px; color: #344e67; }
+    .message-body { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .checks { display: grid; gap: 7px; margin-top: 12px; }
+    .check { border-left: 4px solid #2d8650; background: #eff8f1; padding: 7px 10px; border-radius: 5px; font-size: .78rem; line-height: 1.45; }
+    .check.blocked { border-color: #c44b37; background: #fff1eb; }
+    .check strong { display: block; }
+    .check span { display: block; color: #415362; }
+    .tools { font-size: .78rem; margin-top: 11px; color: #556474; }
+    .composer { border-top: 1px solid #e3e7eb; padding: 14px 18px; }
+    .composer textarea { width: 100%; min-height: 76px; max-height: 190px; resize: vertical; border: 1px solid #afbbc7; border-radius: 8px; padding: 11px; font: inherit; line-height: 1.5; }
+    .composer textarea:focus { outline: 2px solid #a3bfd9; border-color: #607d98; }
+    .composer-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 8px; }
+    .composer-row small { color: #617181; }
+    .send { background: #bd3e2f; color: white; border: 0; border-radius: 8px; padding: 9px 22px; font: inherit; font-weight: 700; cursor: pointer; }
+    .send:hover { background: #9d3024; }
+    button:disabled { opacity: .5; cursor: wait; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } .chat { min-height: 560px; max-height: none; } .messages { min-height: 360px; max-height: 65vh; } }
+  </style>
+</head>
+<body>
+  <header><h1>店舗システム障害 初動支援Agent</h1><p>東都マートの架空アラートを調査し、OCI Guardrailsで質問と回答を判定します。</p></header>
+  <main>
+    <aside class="panel">
+      <h2>サンプル質問</h2>
+      <p class="subtle">選ぶとすぐに送信します。質問1～4は通常の障害対応、質問5～7はGuardrailsの検証です。</p>
+      <div id="samples" class="samples"></div>
+      <section class="glossary" aria-label="Guardrailsの用語">
+        <h2>Guardrailsとは</h2>
+        <dl>
+          <dt>コンテンツモデレーション</dt><dd>暴言・脅迫など、不適切な内容を検出します。</dd>
+          <dt>プロンプトインジェクション</dt><dd>Agentの指示や手順を上書きしようとする文章を検出します。</dd>
+          <dt>PII（個人情報）</dt><dd>氏名・メールアドレスなどを検出します。現在の判定対象は英語です。このデモでは検出を通知して続行します。</dd>
+        </dl>
+      </section>
+    </aside>
+    <section class="panel chat" aria-label="Agentとの会話">
+      <div class="chat-head"><div><h2>会話</h2><small>このブラウザのセッション中だけ履歴を表示します</small></div><button type="button" id="new-chat" class="new-chat">新しい会話</button></div>
+      <div id="messages" class="messages" role="log" aria-live="polite"></div>
+      <form id="composer" class="composer">
+        <label for="question" class="speaker">Agentに質問する</label>
+        <textarea id="question" maxlength="4000" required placeholder="例：ALT-20261008-001 の初動対応票を作ってください。"></textarea>
+        <div class="composer-row"><small>Enterで送信・Shift+Enterで改行。連絡や復旧操作は実行しません。</small><button class="send" type="submit">送信</button></div>
+      </form>
+    </section>
+  </main>
+  <script type="application/json" id="sample-data">__SAMPLES_JSON__</script>
+  <script>
+    const samples = JSON.parse(document.getElementById('sample-data').textContent);
+    const storageKey = 'pos-incident-chat-v1';
+    const transcript = document.getElementById('messages');
+    const input = document.getElementById('question');
+    const form = document.getElementById('composer');
+    const reset = document.getElementById('new-chat');
+    let busy = false;
+    let state;
+    try { state = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); } catch { state = null; }
+    if (!state || !/^[a-f0-9-]{36}$/.test(state.id) || !Array.isArray(state.messages)) {
+      state = {id: crypto.randomUUID(), messages: []};
+    }
+
+    function save() {
+      state.messages = state.messages.slice(-50);
+      try { sessionStorage.setItem(storageKey, JSON.stringify(state)); } catch { /* memory-only fallback */ }
+    }
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+    function renderMessage(message) {
+      const bubble = element('article', `message ${message.role}${message.error ? ' error' : ''}`);
+      bubble.append(element('span', 'speaker', message.role === 'user' ? 'あなた' : '初動支援Agent'));
+      bubble.append(element('div', 'message-body', message.text));
+      if (message.checks?.length) {
+        const group = element('div', 'checks');
+        for (const check of message.checks) {
+          const box = element('div', `check${check.blocked ? ' blocked' : ''}`);
+          box.append(element('strong', '', `${check.stage === 'input' ? '入力' : '回答'}チェック：${check.action}`));
+          const cm = check.moderation >= 1 ? '検出' : 'なし';
+          const pi = check.injection === null ? '対象外' : (check.injection >= 1 ? '検出' : 'なし');
+          box.append(element('span', '', `コンテンツモデレーション: ${cm} ／ プロンプトインジェクション: ${pi}`));
+          box.append(element('span', '', `PII: ${check.pii?.join(', ') || 'なし'} ／ version ${check.version}`));
+          group.append(box);
+        }
+        bubble.append(group);
+      }
+      if (message.trace?.length) {
+        const details = element('details', 'tools');
+        details.append(element('summary', '', '参照したツール'));
+        const list = element('ul');
+        for (const item of message.trace) {
+          list.append(element('li', '', `${item.tool || '不明'}${item.found === null ? '' : item.found ? ' — 該当' : ' — 未登録'}`));
+        }
+        details.append(list);
+        bubble.append(details);
+      }
+      transcript.append(bubble);
+    }
+    function render() {
+      transcript.replaceChildren();
+      if (!state.messages.length) {
+        const empty = element('div', 'empty');
+        empty.append(element('strong', '', 'アラートから初動対応を始めましょう'));
+        empty.append(element('div', '', '左のサンプル質問を選ぶか、下の入力欄から自由に質問してください。'));
+        transcript.append(empty);
+      } else {
+        for (const message of state.messages) renderMessage(message);
+      }
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+    function setBusy(value) {
+      busy = value;
+      form.querySelector('button').disabled = value;
+      input.disabled = value;
+      reset.disabled = value;
+      document.querySelectorAll('.sample').forEach(button => button.disabled = value);
+    }
+    async function send(question) {
+      question = question.trim();
+      if (!question || busy) return;
+      state.messages.push({role: 'user', text: question});
+      state.messages.push({role: 'agent', text: '判定・調査中…', pending: true});
+      input.value = '';
+      setBusy(true);
+      render();
+      try {
+        const response = await fetch(location.href, {
+          method: 'POST', credentials: 'same-origin',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({sessionId: state.id, question})
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+        const last = data.checks[data.checks.length - 1];
+        let text = data.answer;
+        if (!text) text = last?.stage === 'input'
+          ? 'Guardrailsが検出したため、この質問はAgentへ渡さず保留しました。'
+          : 'Guardrailsが検出したため、Agentの回答を表示前に保留しました。';
+        state.messages[state.messages.length - 1] = {role: 'agent', text, checks: data.checks, trace: data.trace};
+      } catch (error) {
+        state.messages[state.messages.length - 1] = {role: 'agent', text: `処理できませんでした。${error.message}`, error: true};
+      } finally {
+        save(); render(); setBusy(false); input.focus();
+      }
+    }
+    for (const sample of samples) {
+      const button = element('button', 'sample');
+      button.type = 'button';
+      button.append(element('strong', '', `質問${sample.number}`));
+      button.append(element('span', '', sample.title));
+      button.title = sample.question;
+      button.addEventListener('click', () => send(sample.question));
+      document.getElementById('samples').append(button);
+    }
+    form.addEventListener('submit', event => { event.preventDefault(); send(input.value); });
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+        event.preventDefault(); send(input.value);
+      }
+    });
+    reset.addEventListener('click', () => {
+      state = {id: crypto.randomUUID(), messages: []};
+      save(); render(); input.focus();
+    });
+    save(); render();
+  </script>
+</body>
+</html>

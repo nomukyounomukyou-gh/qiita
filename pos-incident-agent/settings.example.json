@@ -1,0 +1,8 @@
+{
+  "region": "<REGION>",
+  "project_id": "<GENERATIVE_AI_PROJECT_OCID>",
+  "compartment_id": "<COMPARTMENT_OCID>",
+  "vector_store_id": "<VECTOR_STORE_ID>",
+  "model": "<SUPPORTED_MODEL_ID>",
+  "guardrail_version": "<ACTIVE_GUARDRAIL_VERSION>"
+}

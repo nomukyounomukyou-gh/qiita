@@ -1,0 +1,4 @@
+system_id,service_name,component_name,scope,stores_served,business_criticality,owner_team,primary_contact,escalation_contact,runbook_id,last_reviewed
+POS-CORE-DB,店舗POS基盤,共通データベース,全店舗共通,40,高,店舗システム運用,store-ops@example.com,it-incident-manager@example.com,RB-POS-01,2026-09-30
+STORE-017-POS,店舗POS基盤,店舗017のPOS端末,店舗017,1,高,店舗システム運用,store-ops@example.com,it-incident-manager@example.com,RB-POS-01,2026-09-30
+INV-SYNC-01,在庫連携基盤,在庫同期バッチ,全店舗共通,40,中,業務アプリ運用,app-ops@example.com,it-incident-manager@example.com,RB-INV-02,2026-09-25

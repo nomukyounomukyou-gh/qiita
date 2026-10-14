@@ -1,0 +1,16 @@
+settings.json
+.env
+.env.*
+!.env.example
+connection_info/
+**/connection_info/
+*.pem
+*.key
+*.pub
+known_hosts
+*Wallet*
+__pycache__/
+*.pyc
+.venv/
+*.log
+*.zip

@@ -1,0 +1,47 @@
+{
+  "dataset_name": "東都マート 店舗システム監視アラート（架空）",
+  "snapshot_at": "2026-10-08T11:15:00+09:00",
+  "timezone": "Asia/Tokyo",
+  "alerts": [
+    {
+      "alert_id": "ALT-20261008-001",
+      "system_id": "POS-CORE-DB",
+      "status": "発報中",
+      "detected_at": "2026-10-08T10:57:00+09:00",
+      "observed_at": "2026-10-08T11:15:00+09:00",
+      "duration_minutes": 18,
+      "signal": "POS共通DBへの接続失敗率が高い",
+      "failed_connection_rate_percent": 86,
+      "affected_store_count_observed": 32,
+      "evidence": "40店舗中32店舗のPOS端末から接続失敗を観測。監視上の観測数であり、販売停止店舗数は未確認。",
+      "monitoring_severity": "critical",
+      "ticket_status": "未起票"
+    },
+    {
+      "alert_id": "ALT-20261008-002",
+      "system_id": "STORE-017-POS",
+      "status": "発報中",
+      "detected_at": "2026-10-08T11:09:00+09:00",
+      "observed_at": "2026-10-08T11:15:00+09:00",
+      "duration_minutes": 6,
+      "signal": "店舗017のPOS端末1台が応答しない",
+      "affected_store_count_observed": 1,
+      "evidence": "店舗017の端末1台で疎通失敗。店舗全体の販売停止は未確認。",
+      "monitoring_severity": "warning",
+      "ticket_status": "未起票"
+    },
+    {
+      "alert_id": "ALT-20261008-003",
+      "system_id": "STORE-099-POS",
+      "status": "発報中",
+      "detected_at": "2026-10-08T11:05:00+09:00",
+      "observed_at": "2026-10-08T11:15:00+09:00",
+      "duration_minutes": 10,
+      "signal": "店舗099のPOS端末が応答しない",
+      "affected_store_count_observed": 1,
+      "evidence": "監視対象IDは取得できたが、システム台帳に登録が見当たらない。実在する店舗・端末か未確認。",
+      "monitoring_severity": "warning",
+      "ticket_status": "未起票"
+    }
+  ]
+}
