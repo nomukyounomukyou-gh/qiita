@@ -51,23 +51,15 @@ ZIPをダウンロードして展開しても同じファイルを取得でき�
 
 たとえば共通DBの接続失敗を32店舗で18分間観測したケースでは、手順書の条件に照らして「P1候補」とします。ただし、**32店舗で販売が停止したとは断定しません**。これは監視で異常を観測した店舗数であり、会計や決済が実際に止まった店舗数は別途確認が必要です。
 
-構成は次のとおりです。
+## システム構成
 
-```text
-ブラウザ
-  │ 質問
-  ▼
-OCI Hosted Application（Python / 8080）
-  ├─ 入力Guardrails：コンテンツモデレーション・プロンプトインジェクション
-  ├─ OCI Responses API
-  │    ├─ function: lookup_alert  → alerts.jsonをID完全一致で照会
-  │    ├─ function: lookup_system → system_inventory.csvをID完全一致で照会
-  │    └─ file_search             → ベクトルストアの運用手順書を検索
-  └─ 回答Guardrails：コンテンツモデレーション
-  │
-  ▼
-初動対応票・参照ツール・Guardrails判定を画面に表示
-```
+![店舗システム障害の初動支援Agentの初期版構成図。Hosted Application内のPythonがJSON・CSVを照会し、OCI Generative AIのResponses API、Guardrails、Vector Storeを利用する](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/main/images/oci-enterprise-ai-pos-incident-agent-architecture.png)
+
+[構成図を拡大表示](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/main/images/oci-enterprise-ai-pos-incident-agent-architecture.png) / [編集用PowerPoint](https://github.com/nomukyounomukyou-gh/qiita/blob/main/diagram-source/oci-enterprise-ai-pos-incident-agent-architecture.pptx)
+
+この図は、アラートと台帳をJSON/CSVで保持する初期版の構成です。関数呼び出しの要求はモデルから返りますが、`lookup_alert`と`lookup_system`を実行するのはHosted Application内のPythonです。`file_search`はOCI側のベクトルストアを検索します。
+
+GuardrailsはResponses APIとは別に呼び出し、質問をAgentへ渡す前と、最終回答を表示する前に判定します。検索用Markdownのベクトルストア登録は事前準備です。図の破線矢印で示した処理は、質問のたびに実行するものではありません。
 
 OCI Responses APIはOpenAI互換のリクエスト形式を使えますが、認証・エンドポイント・リソース管理はOCI側です。OCIの公式ドキュメントでも `file_search` と `function` がサポート対象として案内されています。[OCI Responses API](https://docs.oracle.com/en-us/iaas/Content/generative-ai/responses-api.htm)
 
