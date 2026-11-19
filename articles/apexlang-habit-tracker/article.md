@@ -341,9 +341,21 @@ PL/SQLパッケージは、関連する処理をまとめたデータベース�
 
 まず記事と添付ソース一式を、PCまたは作業サーバーの任意の作業用フォルダーへ配置します。
 `article.md`と同じ階層に`scripts`と`applications`がある構成を保ち、端末のカレントディレクトリをそのフォルダーに合わせてください。
-配布URLは公開時に追記予定で、現時点ではローカルで作成した記事一式を利用します。
+ソースと画像は[検証済みのスナップショット](https://github.com/nomukyounomukyou-gh/qiita/tree/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker)で公開しています。
+Gitが入っていない場合は、[Git公式サイト](https://git-scm.com/downloads)から使用するOSのインストーラーを取得して導入し、新しい端末で`git --version`が実行できることを確認します。
+端末で次の順に実行すると、検証したファイルを同じ状態で取得できます。
+チェックアウトする値はコミットIDで、後日のソース変更に影響されず追試するために固定しています。
 
-長いDDLは記事へ分割して貼り付けず、[scripts/01_schema.sql](scripts/01_schema.sql)にまとめています。
+```text
+git clone --filter=blob:none https://github.com/nomukyounomukyou-gh/qiita.git qiita-habit-sample
+cd qiita-habit-sample
+git checkout b0cd64b905fefcc95299b73489e028d4803d2cdb
+cd articles/apexlang-habit-tracker
+```
+
+このフォルダーで、後述するSQLclのコマンドを実行します。
+
+長いDDLは記事へ分割して貼り付けず、[scripts/01_schema.sql](https://github.com/nomukyounomukyou-gh/qiita/blob/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/scripts/01_schema.sql)にまとめています。
 このファイルに2つのテーブル、制約、索引、`HT_API`の定義と本体が入っています。
 実行前に`show user`で、アプリのParsing Schemaと同じDBユーザーへ接続していることを確認します。
 アプリ専用の空のスキーマで一度だけ実行してください。
@@ -574,48 +586,48 @@ apex import -input applications/habit-pulse -workspace HABIT_WORKSPACE -schema H
 取り込んだアプリを実行すると、次のログイン画面が表示されました。
 ブラウザーのアドレスバーは掲載範囲から除外しています。
 
-![Habit Pulseのログイン画面](images/01-login.png)
+![Habit Pulseのログイン画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/01-login.png)
 
 ### 習慣を登録する
 
 初回ログイン時は、習慣がまだありません。
 「今日」の画面から追加操作を行います。
 
-![習慣を登録する前の今日の画面](images/02-today-empty.png)
+![習慣を登録する前の今日の画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/02-today-empty.png)
 
 1. 習慣の追加画面を開きます。
 2. 習慣名に「朝の読書」、説明に「朝食のあとに、好きな本を20分読む。」と入力します。
 3. 表示色、アイコン、表示順を指定します。
 4. 「保存」を押します。
 
-![習慣の登録フォーム](images/03-add-habit.png)
+![習慣の登録フォーム](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/03-add-habit.png)
 
 保存すると一覧にカードが追加されます。
 この時点では「習慣を作成した」だけなので、今日の実施数はまだ0件です。
 
-![追加した習慣がカードで表示される](images/04-habit-created.png)
+![追加した習慣がカードで表示される](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/04-habit-created.png)
 
 入力チェックも確認しました。
 習慣名を空にして「保存」を押すと、保存されずに画面右上と項目の下にエラーが表示されます。
 画像の`習慣名 must have some value.`はAPEXの既定メッセージで、「習慣名を入力してください」という意味です。
 
-![習慣名が空の場合の入力エラー](images/13-validation.png)
+![習慣名が空の場合の入力エラー](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/13-validation.png)
 
 ### 今日の実施を記録・取り消しする
 
 カードの「開く・記録する」を押すと、設定と今日の記録を編集できます。
 「今日のメモ」に内容を入力し、「今日の実施を記録」を押します。
 
-![メモを入力して今日の実施を記録する](images/05-record-form.png)
+![メモを入力して今日の実施を記録する](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/05-record-form.png)
 
 1件中1件を実施したので、今日の達成率は100%になりました。
 ブラウザーで再読み込みしても実施済み状態が保持されることを確認しました。
 
-![実施後の今日の画面](images/06-today-completed.png)
+![実施後の今日の画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/06-today-completed.png)
 
 同じ詳細画面の「今日の記録を取り消す」を押すと、実施記録が削除され、達成率が0%へ戻ります。
 
-![実施を取り消した後の今日の画面](images/07-today-undone.png)
+![実施を取り消した後の今日の画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/07-today-undone.png)
 
 アーカイブも詳細画面から行います。
 再び実施を記録してからアーカイブしたところ、「今日」の対象から外れ、実施履歴は残りました。
@@ -623,7 +635,7 @@ apex import -input applications/habit-pulse -workspace HABIT_WORKSPACE -schema H
 
 ### 架空データを投入して集計を見る
 
-実際の継続記録がなくても集計画面を試せるよう、[scripts/02_demo_data.sql](scripts/02_demo_data.sql)を用意しました。
+実際の継続記録がなくても集計画面を試せるよう、[scripts/02_demo_data.sql](https://github.com/nomukyounomukyou-gh/qiita/blob/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/scripts/02_demo_data.sql)を用意しました。
 3つの現役習慣に対し、今日を含む14日間の架空の実施記録を作成します。
 本番の実績として使わず、専用のデモ利用者で試してください。
 
@@ -637,7 +649,7 @@ SQLclで解析スキーマに接続し、記事用ディレクトリから次を
 同名のデモ習慣がすでにある場合はエラーで停止し、二重投入しません。
 スクリプトは最後に`COMMIT`するため、デモ記録は接続終了後も残ります。
 
-![架空データ投入後の今日の画面](images/08-today-demo.png)
+![架空データ投入後の今日の画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/08-today-demo.png)
 
 現役の習慣は3件、そのうち今日の実施は2件です。
 「今日」の達成率は整数に四捨五入し、`2 ÷ 3 × 100 = 67%`と表示します。
@@ -646,7 +658,7 @@ SQLclで解析スキーマに接続し、記事用ディレクトリから次を
 横軸はJSTの日付、縦軸と系列名は「達成率（%）」です。
 グラフの値は小数第1位までに丸めるため、同じ2件／3件でも66.7%となります。
 
-![直近7日間の達成率のグラフ](images/09-dashboard.png)
+![直近7日間の達成率のグラフ](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/09-dashboard.png)
 
 日ごとの分母は、その日に開始済みで、まだアーカイブしていない習慣の数です。
 対象習慣が0件の日は0%とはせず、集計値をNULLとして扱います。
@@ -657,20 +669,20 @@ SQLclで解析スキーマに接続し、記事用ディレクトリから次を
 習慣管理には、現役とアーカイブ済みの習慣が並びます。
 アーカイブ済みには状態ラベルが付き、過去に登録した内容を確認できます。
 
-![現役とアーカイブ済みを並べた習慣管理](images/10-manage.png)
+![現役とアーカイブ済みを並べた習慣管理](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/10-manage.png)
 
 「履歴」には実施日、習慣名、メモを表示します。
 実機では、アーカイブした習慣の1件と架空データ27件を合わせ、28件の表示を確認しました。
 画面上部の検索や列見出し、Actionsメニューから、APEX標準のレポート機能で絞り込めます。
 
-![アーカイブ済みの記録も残る履歴](images/11-history.png)
+![アーカイブ済みの記録も残る履歴](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/11-history.png)
 
 ### スマートフォン幅で確認する
 
 390px幅でも、カードが画面幅に収まり、横方向にはみ出さないことを確認しました。
 これはブラウザーのスマートフォン幅での表示確認で、各機種の実機テストではありません。
 
-![390px幅での今日の画面](images/12-mobile-today.png)
+![390px幅での今日の画面](https://raw.githubusercontent.com/nomukyounomukyou-gh/qiita/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/images/12-mobile-today.png)
 
 ## 検証結果
 
@@ -679,7 +691,7 @@ SQLclで解析スキーマに接続し、記事用ディレクトリから次を
 2026年11月19日に、実機のAPEX 26.1.6環境で次の8項目を確認し、すべてPASSとなりました。
 初回の検証後、テーブルとAPIの配置先を解析スキーマへそろえ、Habit Pulseのアプリ110のセッションで同じ8項目のPASSを再確認しました。
 API層の検証と、前節で示したブラウザーからの操作確認は分けて実施しています。
-確認用スクリプトは[scripts/03_verify.sql](scripts/03_verify.sql)です。
+確認用スクリプトは[scripts/03_verify.sql](https://github.com/nomukyounomukyou-gh/qiita/blob/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/scripts/03_verify.sql)です。
 ブラウザーを操作するUIテストとは別に、データベース側の更新処理と制約を確認しています。
 
 APEXlangのインポートが完了し、検証対象のAPEXアプリが作成された後、スキーマへ接続したSQLclから次を実行します。
@@ -769,7 +781,7 @@ APEXlangの取り込み成功だけでは、画面が使えることの確認に
 
 また、スキルに同梱されたひな形と実機のAPEXlangコンパイラで、属性名などに差がありました。
 実機の`apex validate`が返すファイル名・行番号を使って修正し、警告のない検証成功後に取り込みました。
-互換性調整の詳細は[implementation-notes.md](implementation-notes.md)に記録しています。
+互換性調整の詳細は[implementation-notes.md](https://github.com/nomukyounomukyou-gh/qiita/blob/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/implementation-notes.md)に記録しています。
 
 画面定義はAPEXlang、データ制約と更新処理はSQL／PL/SQL、配色や余白はCSSで担当させています。
 連続日数などの未実装機能は、基本の登録・保存・集計の動作を確認したうえで追加する改善対象です。
@@ -796,7 +808,7 @@ UIの参考にしたのは[APEXlangでVibe Coding：画面デザイン集](https
 APEXユーザーの削除だけではHT_HABITとHT_CHECKINの行は削除されません。
 共有環境の場合は、他のアプリや利用者のデータを削除しないよう、対象を確認してから操作してください。
 
-専用デモ利用者のデータを削除する場合は、[scripts/05_cleanup_demo.sql](scripts/05_cleanup_demo.sql)を用意しています。
+専用デモ利用者のデータを削除する場合は、[scripts/05_cleanup_demo.sql](https://github.com/nomukyounomukyou-gh/qiita/blob/b0cd64b905fefcc95299b73489e028d4803d2cdb/articles/apexlang-habit-tracker/scripts/05_cleanup_demo.sql)を用意しています。
 今回の片付けでも、このスクリプトのPREVIEWとDELETEを実行し、実施記録28件、習慣4件の削除と残件数0を確認しました。
 スクリプトは指定した所有者のすべての習慣・実施記録を削除するため、実際の記録が混在するユーザー名は指定しないでください。
 
