@@ -1,0 +1,78 @@
+breadcrumb breadcrumb (
+    name: Breadcrumb
+
+    entry today (
+        name: 今日
+        pageNumber: 1
+        execution {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+    entry dashboard (
+        name: 振り返り
+        pageNumber: 2
+        execution {
+            sequence: 2
+        }
+        appearance {
+            parentEntry: @today
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+    entry habits (
+        name: 習慣管理
+        pageNumber: 3
+        execution {
+            sequence: 3
+        }
+        appearance {
+            parentEntry: @today
+        }
+        link {
+            target: {
+                page: 3
+            }
+        }
+    )
+    entry history (
+        name: 履歴
+        pageNumber: 4
+        execution {
+            sequence: 4
+        }
+        appearance {
+            parentEntry: @today
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+    entry habit (
+        name: 習慣を編集
+        pageNumber: 10
+        execution {
+            sequence: 10
+        }
+        appearance {
+            parentEntry: @habits
+        }
+        link {
+            target: {
+                page: 10
+            }
+        }
+    )
+
+)

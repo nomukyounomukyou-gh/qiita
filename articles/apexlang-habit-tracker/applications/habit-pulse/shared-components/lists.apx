@@ -1,0 +1,123 @@
+list navigation-bar (
+    name: Navigation Bar
+
+    entry --- (
+        label: ---
+        layout {
+            sequence: 20
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: separator
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+    entry app-user (
+        label: &APP_USER.
+        icon {
+            imageIconCssClasses: fa-user
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                type: url
+                url: #
+            }
+        }
+        userDefinedAttributes {
+            2: has-username
+        }
+    )
+
+    entry sign-out (
+        label: Sign Out
+        icon {
+            imageIconCssClasses: fa-sign-out
+        }
+        layout {
+            sequence: 30
+            parentEntry: @app-user
+        }
+        link {
+            target: {
+                type: url
+                url: &LOGOUT_URL.
+            }
+        }
+        serverSideCondition {
+            type: userIsAuthenticated
+        }
+    )
+
+)
+
+list navigation-menu (
+    name: Navigation Menu
+
+    entry dashboard (
+        label: 振り返り
+        icon {
+            imageIconCssClasses: fa-bar-chart
+        }
+        layout {
+            sequence: 20
+        }
+        link {
+            target: {
+                page: 2
+            }
+        }
+    )
+    entry habits (
+        label: 習慣管理
+        icon {
+            imageIconCssClasses: fa-list
+        }
+        layout {
+            sequence: 30
+        }
+        link {
+            target: {
+                page: 3
+            }
+        }
+    )
+    entry history (
+        label: 履歴
+        icon {
+            imageIconCssClasses: fa-history
+        }
+        layout {
+            sequence: 40
+        }
+        link {
+            target: {
+                page: 4
+            }
+        }
+    )
+
+    entry home (
+        label: 今日
+        icon {
+            imageIconCssClasses: fa-home
+        }
+        layout {
+            sequence: 10
+        }
+        link {
+            target: {
+                page: 1
+            }
+        }
+    )
+
+)

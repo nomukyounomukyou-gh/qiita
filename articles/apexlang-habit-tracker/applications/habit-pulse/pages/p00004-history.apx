@@ -1,0 +1,104 @@
+page 4 (
+    name: "履歴"
+    alias: HISTORY
+    title: "履歴 | Habit Pulse"
+    css {
+        inline:
+            ```css
+            :root{--ut-palette-primary:#176b50;--ut-link-text-color:#176b50;--ut-body-background-color:#f3f7f3;--ut-header-background-color:#123f32;--ut-header-text-color:#fff;--ut-border-radius:16px}
+            .t-Body-contentInner{max-width:1260px;margin:auto;padding:32px}.t-Region{border-radius:18px;box-shadow:0 8px 28px #153c2510;border:1px solid #e0ebe3}.a-CardView{border-radius:20px;box-shadow:0 6px 24px #153c2510;min-height:220px}.a-CardView-title{font-size:1.25rem}.a-CardView-subTitle{color:#176b50}.t-Breadcrumb-label{letter-spacing:.03em}.t-Button--hot{background:#176b50;border-radius:10px}.a-CardView-button{border-radius:9px}.t-Form-fieldContainer{margin-bottom:12px}
+            @media(max-width:640px){.t-Body-contentInner{padding:14px}.a-CardView{min-height:180px}}
+            ```
+    }
+    appearance {
+        pageTemplate: @/standard
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: "習慣を記録し、小さな積み重ねを振り返ります。"
+    }
+    region breadcrumb (
+        name: "履歴"
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+    region records (
+        name: "実施履歴"
+        type: interactiveReport
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+            ```sql
+            select c.checkin_date,h.habit_name,c.note from ht_checkin c join ht_habit h on h.habit_id=c.habit_id where h.owner_name=upper(:APP_USER) order by c.checkin_date desc,h.display_order
+            ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/interactive-report
+        }
+        column CHECKIN_DATE (
+            type: plainText
+            heading {
+                heading: "実施日"
+            }
+            layout {
+                sequence: 10
+            }
+            source {
+                dataType: DATE
+            }
+            comments {
+                comments: "実施日を表示します。所有者で絞り込まれた記録です。"
+            }
+        )
+        column HABIT_NAME (
+            type: plainText
+            heading {
+                heading: "習慣名"
+            }
+            layout {
+                sequence: 20
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: "習慣名を表示します。所有者で絞り込まれた記録です。"
+            }
+        )
+        column NOTE (
+            type: plainText
+            heading {
+                heading: "メモ"
+            }
+            layout {
+                sequence: 30
+            }
+            source {
+                dataType: STRING
+            }
+            comments {
+                comments: "メモを表示します。所有者で絞り込まれた記録です。"
+            }
+        )
+    )
+)

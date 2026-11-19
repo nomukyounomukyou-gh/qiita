@@ -1,0 +1,10 @@
+{
+  "app": {
+    "databaseSession": {
+      "parsingSchema": "HABIT_APP"
+    }
+  },
+  "workspace": {
+    "name": "HABIT_WORKSPACE"
+  }
+}

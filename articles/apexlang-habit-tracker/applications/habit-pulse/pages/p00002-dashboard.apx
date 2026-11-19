@@ -1,0 +1,145 @@
+page 2 (
+    name: "振り返り"
+    alias: DASHBOARD
+    title: "振り返り | Habit Pulse"
+    css {
+        inline:
+            ```css
+            :root{--ut-palette-primary:#176b50;--ut-link-text-color:#176b50;--ut-body-background-color:#f3f7f3;--ut-header-background-color:#123f32;--ut-header-text-color:#fff;--ut-border-radius:16px}
+            .t-Body-contentInner{max-width:1260px;margin:auto;padding:32px}.t-Region{border-radius:18px;box-shadow:0 8px 28px #153c2510;border:1px solid #e0ebe3}.a-CardView{border-radius:20px;box-shadow:0 6px 24px #153c2510;min-height:220px}.a-CardView-title{font-size:1.25rem}.a-CardView-subTitle{color:#176b50}.t-Breadcrumb-label{letter-spacing:.03em}.t-Button--hot{background:#176b50;border-radius:10px}.a-CardView-button{border-radius:9px}.t-Form-fieldContainer{margin-bottom:12px}
+            @media(max-width:640px){.t-Body-contentInner{padding:14px}.a-CardView{min-height:180px}}
+            ```
+    }
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: "毎日の小さな積み重ねを記録しましょう。日付は日本標準時です。"
+    }
+    region breadcrumb (
+        name: "振り返り"
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+    region daily (
+        name: "直近7日間の達成率"
+        type: chart
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+        }
+        chart {
+            type: line
+        }
+        series completion (
+            name: "達成率（%）"
+            execution {
+                sequence: 10
+            }
+            source {
+                location: localDatabase
+                type: sqlQuery
+                sqlQuery:
+                ```sql
+                with days as(select ht_api.today-7+level dt from dual connect by level<=7)
+                select to_char(d.dt,'MM/DD') LABEL,
+                round(count(c.checkin_id)*100/nullif(count(h.habit_id),0),1) VALUE
+                from days d left join ht_habit h on h.owner_name=upper(:APP_USER) and h.start_date<=d.dt and (h.archived_date is null or d.dt<h.archived_date)
+                left join ht_checkin c on c.habit_id=h.habit_id and c.checkin_date=d.dt
+                group by d.dt order by d.dt
+                ```
+            }
+            columnMapping {
+                label: LABEL
+                value: VALUE
+            }
+        )
+        axis x (
+            name: x
+            title: "日付（日本標準時）"
+        )
+        axis y (
+            name: y
+            title: "達成率（%）"
+            value {
+                min: 0
+                max: 100
+            }
+        )
+    )
+    region habits (
+        name: "習慣別の記録"
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+            ```sql
+            select h.habit_id,h.habit_name,h.description,'fa '||h.icon_name icon_name,
+            case when h.archived_date is not null then 'アーカイブ済み'
+            when exists(select 1 from ht_checkin c where c.habit_id=h.habit_id and c.checkin_date=ht_api.today) then '実施済み ✓' else '今日も一歩ずつ' end status_label
+            from ht_habit h where h.owner_name=upper(:APP_USER) order by h.display_order,h.habit_id
+            ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: HABIT_ID
+        }
+        title {
+            column: HABIT_NAME
+        }
+        subtitle {
+            column: STATUS_LABEL
+        }
+        body {
+            column: DESCRIPTION
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: ICON_NAME
+        }
+        action detail (
+            label: "開く・記録する"
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 10
+                    clearCache: 10
+                    items: {
+                        P10_ID: &HABIT_ID.
+                    }
+                }
+            }
+        )
+    )
+)

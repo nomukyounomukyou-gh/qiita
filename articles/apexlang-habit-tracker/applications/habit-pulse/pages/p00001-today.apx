@@ -1,0 +1,165 @@
+page 1 (
+    name: "今日"
+    alias: TODAY
+    title: "今日 | Habit Pulse"
+    css {
+        inline:
+            ```css
+            :root{--ut-palette-primary:#176b50;--ut-link-text-color:#176b50;--ut-body-background-color:#f3f7f3;--ut-header-background-color:#123f32;--ut-header-text-color:#fff;--ut-border-radius:16px}
+            .t-Body-contentInner{max-width:1260px;margin:auto;padding:32px}.t-Region{border-radius:18px;box-shadow:0 8px 28px #153c2510;border:1px solid #e0ebe3}.a-CardView{border-radius:20px;box-shadow:0 6px 24px #153c2510;min-height:220px}.a-CardView-title{font-size:1.25rem}.a-CardView-subTitle{color:#176b50}.t-Breadcrumb-label{letter-spacing:.03em}.t-Button--hot{background:#176b50;border-radius:10px}.a-CardView-button{border-radius:9px}.t-Form-fieldContainer{margin-bottom:12px}
+            .t-MetricCard-metric{font-size:2.4rem;font-weight:700;line-height:1.2;color:#176b50}.t-MetricCard{padding:24px;border-radius:18px;background:#fff;border:1px solid #e0ebe3}.t-MetricCard-title{font-size:.95rem;line-height:1.5;color:#61776a;margin-bottom:10px}.t-MetricCard-body{padding:8px 0}.t-MetricCard-meta{margin-top:10px;color:#61776a}
+            @media(max-width:640px){.t-Body-contentInner{padding:14px}.a-CardView{min-height:180px}}
+            ```
+    }
+    appearance {
+        pageTemplate: @/standard
+        templateOptions: #DEFAULT#
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: "毎日の小さな積み重ねを記録しましょう。日付は日本標準時です。"
+    }
+    region breadcrumb (
+        name: "今日"
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+            templateOptions: #DEFAULT#
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+    region metrics (
+        name: "今日の進み具合"
+        type: themeTemplateComponent/metricCard
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+            ```sql
+            with s as (select count(*) total,sum(case when c.checkin_id is not null then 1 else 0 end) done from ht_habit h left join ht_checkin c on c.habit_id=h.habit_id and c.checkin_date=ht_api.today where h.owner_name=upper(:APP_USER) and h.archived_date is null and h.start_date<=ht_api.today)
+            select '今日の習慣' title,to_char(total) metric from s
+            union all select '実施済み',to_char(nvl(done,0)) from s
+            union all select '達成率',case when total=0 then '対象なし' else to_char(round(nvl(done,0)*100/total))||'%' end from s
+            ```
+        }
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/blank-with-attributes
+        }
+        componentAppearance {
+            display: report
+        }
+        settings {
+            title: &TITLE.
+            metric: &METRIC.
+            layout: 3Columns
+        }
+        column TITLE (
+            layout {
+                sequence: 10
+            }
+            source {
+                databaseColumn: TITLE
+                dataType: varchar2
+            }
+        )
+        column METRIC (
+            layout {
+                sequence: 20
+            }
+            source {
+                databaseColumn: METRIC
+                dataType: varchar2
+            }
+        )
+    )
+    region habits (
+        name: "今日の習慣"
+        type: cards
+        source {
+            location: localDatabase
+            type: sqlQuery
+            sqlQuery:
+            ```sql
+            select h.habit_id,h.habit_name,h.description,'fa '||h.icon_name icon_name,
+            case when h.archived_date is not null then 'アーカイブ済み'
+            when exists(select 1 from ht_checkin c where c.habit_id=h.habit_id and c.checkin_date=ht_api.today) then '実施済み ✓' else '今日も一歩ずつ' end status_label
+            from ht_habit h where h.owner_name=upper(:APP_USER) and h.archived_date is null and h.start_date<=ht_api.today order by h.display_order,h.habit_id
+            ```
+        }
+        layout {
+            sequence: 30
+            slot: body
+        }
+        appearance {
+            template: @/cards-container
+            templateOptions: #DEFAULT#
+        }
+        card {
+            primaryKeyColumn1: HABIT_ID
+        }
+        title {
+            column: HABIT_NAME
+        }
+        subtitle {
+            column: STATUS_LABEL
+        }
+        body {
+            column: DESCRIPTION
+        }
+        iconAndBadge {
+            iconSource: iconClassColumn
+            iconColumn: ICON_NAME
+        }
+        action detail (
+            label: "開く・記録する"
+            layout {
+                sequence: 10
+            }
+            behavior {
+                target: {
+                    page: 10
+                    clearCache: 10
+                    items: {
+                        P10_ID: &HABIT_ID.
+                    }
+                }
+            }
+        )
+    )
+    button ADD (
+        buttonName: ADD
+        label: "習慣を追加"
+        layout {
+            sequence: 10
+            region: @breadcrumb
+            slot: next
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+        }
+        behavior {
+            action: redirectThisApp
+            target: {
+                page: 10
+                clearCache: 10
+            }
+        }
+    )
+)

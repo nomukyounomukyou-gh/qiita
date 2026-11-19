@@ -1,0 +1,15 @@
+{
+  "sourceEvidence":{"requirements":["requirements.md"],"schema":["scripts/01_schema.sql"]},
+  "pageInventory":[
+    {"page":1,"name":"今日","type":"dashboard","requirementId":"today"},
+    {"page":2,"name":"振り返り","type":"dashboard","requirementId":"dashboard"},
+    {"page":3,"name":"習慣管理","type":"cards","requirementId":"management"},
+    {"page":4,"name":"履歴","type":"interactive-report","requirementId":"history"},
+    {"page":10,"name":"習慣を編集","type":"form","requirementId":"management"}
+  ],
+  "compositionPlan":{"breadcrumbs":[{"page":1,"entry":"today","root":true},{"page":2,"entry":"dashboard","parentPage":1},{"page":3,"entry":"habits","parentPage":1},{"page":4,"entry":"history","parentPage":1},{"page":10,"entry":"habit","parentPage":3}],"navigation":[1,2,3,4]},
+  "richUiPatternPlan":[{"page":1,"pattern":"metricCard"},{"page":1,"pattern":"cards"},{"page":2,"pattern":"chart"}],
+  "lovPlan":{"color":["green","blue","orange","purple"],"icon":["fa-check-circle","fa-book","fa-heart","fa-bicycle"]},
+  "behaviorPlan":{"pageActions":[{"page":1,"label":"習慣を追加","targetPage":10,"placement":"breadcrumb"}],"validations":[{"page":10,"item":"P10_NAME","required":true,"maxLength":80}],"formContext":[{"page":10,"item":"P10_ID","visible":false,"editable":false}],"formDefaults":[{"page":10,"item":"P10_COLOR","value":"green"}],"modalTargets":[],"fullPageTargets":[{"sourcePage":1,"targetPage":10,"targetItems":{"P10_ID":"HABIT_ID"}}]},
+  "testPlan":["create and reload","record and undo","archive keeps history","owner isolation","unique day","chart matches SQL","PC/mobile screenshot"]
+}

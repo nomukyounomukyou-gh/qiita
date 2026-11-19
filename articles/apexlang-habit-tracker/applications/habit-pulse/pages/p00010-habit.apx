@@ -1,0 +1,373 @@
+page 10 (
+    name: "習慣を編集"
+    alias: HABIT
+    title: "習慣を編集 | Habit Pulse"
+    css {
+        inline:
+            ```css
+            :root{--ut-palette-primary:#176b50;--ut-link-text-color:#176b50;--ut-body-background-color:#f3f7f3;--ut-header-background-color:#123f32;--ut-header-text-color:#fff;--ut-border-radius:16px}
+            .t-Body-contentInner{max-width:1260px;margin:auto;padding:32px}.t-Region{border-radius:18px;box-shadow:0 8px 28px #153c2510;border:1px solid #e0ebe3}.a-CardView{border-radius:20px;box-shadow:0 6px 24px #153c2510;min-height:220px}.a-CardView-title{font-size:1.25rem}.a-CardView-subTitle{color:#176b50}.t-Breadcrumb-label{letter-spacing:.03em}.t-Button--hot{background:#176b50;border-radius:10px}.a-CardView-button{border-radius:9px}.t-Form-fieldContainer{margin-bottom:12px}
+            .t-Form-inputContainer input:not([type=hidden]),.t-Form-inputContainer textarea,.t-Form-inputContainer select{box-sizing:border-box;width:100%;max-width:640px;min-height:42px;padding:10px 12px;border:1px solid #c9d9ce;border-radius:8px;font:inherit;background:#fff}.t-Form-inputContainer textarea{min-height:110px;resize:vertical}.t-Form-label{font-weight:600;color:#254b3a}.t-Form-fieldContainer{margin-bottom:20px}.t-Form-inputContainer input:focus-visible,.t-Form-inputContainer textarea:focus-visible,.t-Form-inputContainer select:focus-visible{outline:3px solid #9cd8b8;outline-offset:2px}
+            .apex-item-group--textarea{width:100%;max-width:640px}
+            @media(max-width:640px){.t-Body-contentInner{padding:14px}.a-CardView{min-height:180px}}
+            ```
+    }
+    appearance {
+        pageTemplate: @/standard
+    }
+    security {
+        pageAccessProtection: argumentsMustHaveChecksum
+        formAutoComplete: false
+    }
+    help {
+        helpText: "習慣を記録し、小さな積み重ねを振り返ります。"
+    }
+    region breadcrumb (
+        name: "習慣を編集"
+        type: breadcrumb
+        source {
+            breadcrumb: @breadcrumb
+        }
+        layout {
+            sequence: 10
+            slot: breadcrumbBar
+        }
+        appearance {
+            template: @/title-bar
+        }
+        componentAppearance {
+            breadcrumbTemplate: @/breadcrumb
+        }
+    )
+    region details (
+        name: "習慣の設定と今日の記録"
+        type: staticContent
+        layout {
+            sequence: 20
+            slot: body
+        }
+        appearance {
+            template: @/standard
+        }
+        source {
+            htmlCode:
+            ```html
+            <p>毎日の小さな行動を登録しましょう。記録できるのは日本標準時の今日です。</p>
+            ```
+        }
+    )
+    pageItem P10_ID (
+        type: hidden
+        layout {
+            sequence: 1
+            region: @details
+            slot: regionBody
+        }
+        security {
+            sessionStateProtection: checksumRequiredSessionLevel
+        }
+    )
+    pageItem P10_NAME (
+        type: textField
+        label {
+            label: "習慣名"
+        }
+        layout {
+            sequence: 10
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "80文字以内で入力します。"
+        }
+        validation {
+            valueRequired: true
+            maxLength: 80
+        }
+    )
+    pageItem P10_DESCRIPTION (
+        type: textarea
+        label {
+            label: "説明"
+        }
+        layout {
+            sequence: 20
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "目標や取り組むタイミングを500文字以内で入力できます。"
+        }
+    )
+    pageItem P10_COLOR (
+        type: selectList
+        label {
+            label: "表示色"
+        }
+        layout {
+            sequence: 30
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "カード表示に使用する色を選びます。"
+        }
+        lov {
+            type: staticValues
+            staticValues: "STATIC:緑;green,青;blue,橙;orange,紫;purple"
+        }
+    )
+    pageItem P10_ICON (
+        type: selectList
+        label {
+            label: "アイコン"
+        }
+        layout {
+            sequence: 40
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "習慣を見分けるアイコンを選びます。"
+        }
+        lov {
+            type: staticValues
+            staticValues: "STATIC:チェック;fa-check-circle,読書;fa-book,健康;fa-heart,運動;fa-bicycle"
+        }
+    )
+    pageItem P10_ORDER (
+        type: numberField
+        label {
+            label: "表示順"
+        }
+        layout {
+            sequence: 50
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "小さい数字を先に表示します。"
+        }
+    )
+    pageItem P10_NOTE (
+        type: textarea
+        label {
+            label: "今日のメモ"
+        }
+        layout {
+            sequence: 60
+            region: @details
+            slot: regionBody
+        }
+        appearance {
+            template: @/optional-above
+        }
+        help {
+            helpText: "今日の実施内容を500文字以内で記録できます。"
+        }
+    )
+    button SAVE (
+        buttonName: SAVE
+        label: "保存"
+        layout {
+            sequence: 10
+            region: @details
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+            hot: true
+        }
+        behavior {
+            action: submitPage
+            executeValidations: true
+        }
+    )
+    button RECORD (
+        buttonName: RECORD
+        label: "今日の実施を記録"
+        layout {
+            sequence: 20
+            region: @details
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+        }
+        behavior {
+            action: submitPage
+            executeValidations: false
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P10_ID
+        }
+    )
+    button UNDO (
+        buttonName: UNDO
+        label: "今日の記録を取り消す"
+        layout {
+            sequence: 30
+            region: @details
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+        }
+        behavior {
+            action: submitPage
+            executeValidations: false
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P10_ID
+        }
+    )
+    button ARCHIVE (
+        buttonName: ARCHIVE
+        label: "アーカイブ"
+        layout {
+            sequence: 40
+            region: @details
+            slot: bottom
+        }
+        appearance {
+            buttonTemplate: @/text
+        }
+        behavior {
+            action: submitPage
+            executeValidations: false
+        }
+        serverSideCondition {
+            type: itemIsNotNull
+            item: P10_ID
+        }
+    )
+    process load (
+        name: load
+        type: executeCode
+        execution {
+            sequence: 10
+            point: beforeHeader
+        }
+        source {
+            location: localDatabase
+            language: plsql
+            plsqlCode:
+            ```plsql
+            begin
+            if :P10_ID is not null then
+            select habit_name,description,color_code,icon_name,display_order
+            into :P10_NAME,:P10_DESCRIPTION,:P10_COLOR,:P10_ICON,:P10_ORDER
+            from ht_habit where habit_id=:P10_ID and owner_name=upper(:APP_USER);
+            begin select note into :P10_NOTE from ht_checkin where habit_id=:P10_ID and checkin_date=ht_api.today; exception when no_data_found then :P10_NOTE:=null; end;
+            else :P10_COLOR:='green'; :P10_ICON:='fa-check-circle'; :P10_ORDER:=10; end if;
+            end;
+            ```
+        }
+    )
+    process save (
+        name: save
+        type: executeCode
+        execution {
+            sequence: 10
+            point: processing
+        }
+        source {
+            location: localDatabase
+            language: plsql
+            plsqlCode:
+            ```plsql
+            begin ht_api.save_habit(:P10_ID,:P10_NAME,:P10_DESCRIPTION,:P10_COLOR,:P10_ICON,:P10_ORDER); end;
+            ```
+        }
+        serverSideCondition {
+            whenButtonPressed: @SAVE
+        }
+    )
+    process record (
+        name: record
+        type: executeCode
+        execution {
+            sequence: 10
+            point: processing
+        }
+        source {
+            location: localDatabase
+            language: plsql
+            plsqlCode:
+            ```plsql
+            begin ht_api.record_today(:P10_ID,:P10_NOTE); end;
+            ```
+        }
+        serverSideCondition {
+            whenButtonPressed: @RECORD
+        }
+    )
+    process undo (
+        name: undo
+        type: executeCode
+        execution {
+            sequence: 10
+            point: processing
+        }
+        source {
+            location: localDatabase
+            language: plsql
+            plsqlCode:
+            ```plsql
+            begin ht_api.undo_today(:P10_ID); end;
+            ```
+        }
+        serverSideCondition {
+            whenButtonPressed: @UNDO
+        }
+    )
+    process archive (
+        name: archive
+        type: executeCode
+        execution {
+            sequence: 10
+            point: processing
+        }
+        source {
+            location: localDatabase
+            language: plsql
+            plsqlCode:
+            ```plsql
+            begin ht_api.archive_habit(:P10_ID); end;
+            ```
+        }
+        serverSideCondition {
+            whenButtonPressed: @ARCHIVE
+        }
+    )
+    branch back (
+        name: "今日へ戻る"
+        execution {
+            sequence: 100
+            point: afterProcessing
+        }
+        behavior {
+            type: pageOrUrl
+            target: {
+                page: 1
+            }
+        }
+    )
+)
